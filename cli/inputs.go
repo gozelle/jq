@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"github.com/gozelle/jq"
 	"io"
 	"os"
 	"strings"
@@ -60,7 +61,7 @@ func (ir *inputReader) getContents(offset *int64, line *int) string {
 }
 
 type inputIter interface {
-	gojq.Iter
+	jq.Iter
 	io.Closer
 	Name() string
 }

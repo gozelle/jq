@@ -2,6 +2,7 @@ package jq_test
 
 import (
 	"fmt"
+	"github.com/gozelle/jq"
 	"math"
 	"math/big"
 	"testing"
@@ -103,7 +104,7 @@ func TestPreview(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%v", tc.value), func(t *testing.T) {
-			got := gojq.Preview(tc.value)
+			got := jq.Preview(tc.value)
 			if got != tc.expected {
 				t.Errorf("Preview(%v): got %s, expected %s", tc.value, got, tc.expected)
 			}

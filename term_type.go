@@ -29,7 +29,7 @@ const (
 
 // GoString implements [fmt.GoStringer].
 func (termType TermType) GoString() (str string) {
-	defer func() { str = "gojq." + str }()
+	defer func() { str = "jq." + str }()
 	switch termType {
 	case TermTypeIdentity:
 		return "TermTypeIdentity"

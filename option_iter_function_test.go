@@ -2,6 +2,7 @@ package jq_test
 
 import (
 	"fmt"
+	"github.com/gozelle/jq"
 	"log"
 )
 
@@ -20,19 +21,19 @@ func (iter *rangeIter) Next() (interface{}, bool) {
 }
 
 func ExampleWithIterFunction() {
-	query, err := gojq.Parse("f(3; 7)")
+	query, err := jq.Parse("f(3; 7)")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	code, err := gojq.Compile(
+	code, err := jq.Compile(
 		query,
-		gojq.WithIterFunction("f", 2, 2, func(_ interface{}, xs []interface{}) gojq.Iter {
+		jq.WithIterFunction("f", 2, 2, func(_ interface{}, xs []interface{}) jq.Iter {
 			if x, ok := xs[0].(int); ok {
 				if y, ok := xs[1].(int); ok {
 					return &rangeIter{x, y}
 				}
 			}
-			return gojq.NewIter(fmt.Errorf("f cannot be applied to: %v", xs))
+			return jq.NewIter(fmt.Errorf("f cannot be applied to: %v", xs))
 		}),
 	)
 	if err != nil {

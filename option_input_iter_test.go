@@ -2,17 +2,18 @@ package jq_test
 
 import (
 	"fmt"
+	"github.com/gozelle/jq"
 	"log"
 )
 
 func ExampleWithInputIter() {
-	query, err := gojq.Parse("reduce inputs as $x (0; . + $x)")
+	query, err := jq.Parse("reduce inputs as $x (0; . + $x)")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	code, err := gojq.Compile(
+	code, err := jq.Compile(
 		query,
-		gojq.WithInputIter(gojq.NewIter(1, 2, 3, 4, 5)),
+		jq.WithInputIter(jq.NewIter(1, 2, 3, 4, 5)),
 	)
 	if err != nil {
 		log.Fatalln(err)

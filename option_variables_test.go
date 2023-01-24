@@ -2,17 +2,18 @@ package jq_test
 
 import (
 	"fmt"
+	"github.com/gozelle/jq"
 	"log"
 )
 
 func ExampleWithVariables() {
-	query, err := gojq.Parse("$x * 100 + $y, $z")
+	query, err := jq.Parse("$x * 100 + $y, $z")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	code, err := gojq.Compile(
+	code, err := jq.Compile(
 		query,
-		gojq.WithVariables([]string{
+		jq.WithVariables([]string{
 			"$x", "$y", "$z",
 		}),
 	)

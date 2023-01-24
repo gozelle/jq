@@ -2,21 +2,22 @@ package jq_test
 
 import (
 	"fmt"
+	"github.com/gozelle/jq"
 	"log"
 )
 
 type moduleLoader struct{}
 
-func (*moduleLoader) LoadModule(name string) (*gojq.Query, error) {
+func (*moduleLoader) LoadModule(name string) (*jq.Query, error) {
 	switch name {
 	case "module1":
-		return gojq.Parse(`
+		return jq.Parse(`
 			module { name: "module1", test: 42 };
 			import "module2" as foo;
 			def f: foo::f;
 		`)
 	case "module2":
-		return gojq.Parse(`
+		return jq.Parse(`
 			def f: .foo;
 		`)
 	}
@@ -24,16 +25,16 @@ func (*moduleLoader) LoadModule(name string) (*gojq.Query, error) {
 }
 
 func ExampleWithModuleLoader() {
-	query, err := gojq.Parse(`
+	query, err := jq.Parse(`
 		import "module1" as m;
 		m::f
 	`)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	code, err := gojq.Compile(
+	code, err := jq.Compile(
 		query,
-		gojq.WithModuleLoader(&moduleLoader{}),
+		jq.WithModuleLoader(&moduleLoader{}),
 	)
 	if err != nil {
 		log.Fatalln(err)

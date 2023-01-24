@@ -2,6 +2,7 @@ package jq_test
 
 import (
 	"fmt"
+	"github.com/gozelle/jq"
 	"math"
 	"math/big"
 	"testing"
@@ -42,7 +43,7 @@ func TestMarshal(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%v", tc.value), func(t *testing.T) {
-			got, err := gojq.Marshal(tc.value)
+			got, err := jq.Marshal(tc.value)
 			if err != nil {
 				t.Fatal(err)
 			}

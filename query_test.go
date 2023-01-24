@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/gozelle/jq"
 	"log"
 	"math"
 	"math/big"
@@ -17,7 +18,7 @@ import (
 )
 
 func ExampleQuery_Run() {
-	query, err := gojq.Parse(".foo | ..")
+	query, err := jq.Parse(".foo | ..")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -42,7 +43,7 @@ func ExampleQuery_Run() {
 }
 
 func ExampleQuery_RunWithContext() {
-	query, err := gojq.Parse("def f: f; f, f")
+	query, err := jq.Parse("def f: f; f, f")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -66,7 +67,7 @@ func ExampleQuery_RunWithContext() {
 }
 
 func TestQueryRun_Errors(t *testing.T) {
-	query, err := gojq.Parse(".[] | error")
+	query, err := jq.Parse(".[] | error")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,7 +93,7 @@ func TestQueryRun_Errors(t *testing.T) {
 }
 
 func TestQueryRun_ObjectError(t *testing.T) {
-	query, err := gojq.Parse(".[] | {(.): 1}")
+	query, err := jq.Parse(".[] | {(.): 1}")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,7 +115,7 @@ func TestQueryRun_ObjectError(t *testing.T) {
 }
 
 func TestQueryRun_IndexError(t *testing.T) {
-	query, err := gojq.Parse(".foo")
+	query, err := jq.Parse(".foo")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -136,7 +137,7 @@ func TestQueryRun_IndexError(t *testing.T) {
 }
 
 func TestQueryRun_InvalidPathError(t *testing.T) {
-	query, err := gojq.Parse(". + 1, path(. + 1)")
+	query, err := jq.Parse(". + 1, path(. + 1)")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -157,7 +158,7 @@ func TestQueryRun_InvalidPathError(t *testing.T) {
 }
 
 func TestQueryRun_IteratorError(t *testing.T) {
-	query, err := gojq.Parse(".[]")
+	query, err := jq.Parse(".[]")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -178,7 +179,7 @@ func TestQueryRun_IteratorError(t *testing.T) {
 }
 
 func TestQueryRun_Strings(t *testing.T) {
-	query, err := gojq.Parse(
+	query, err := jq.Parse(
 		"[\"\x00\\\\\", \"\x1f\\\"\", \"\n\\n\n\\(\"\\n\")\n\\n\", " +
 			"\"\\/\", \"\x7f\", \"\x80\", \"\\ud83d\\ude04\" | explode[]]",
 	)
@@ -204,7 +205,7 @@ func TestQueryRun_Strings(t *testing.T) {
 }
 
 func TestQueryRun_NumericTypes(t *testing.T) {
-	query, err := gojq.Parse(".[] + 0 != 0")
+	query, err := jq.Parse(".[] + 0 != 0")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -230,7 +231,7 @@ func TestQueryRun_NumericTypes(t *testing.T) {
 }
 
 func TestQueryRun_Input(t *testing.T) {
-	query, err := gojq.Parse("input")
+	query, err := jq.Parse("input")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -249,7 +250,7 @@ func TestQueryRun_Input(t *testing.T) {
 }
 
 func TestQueryRun_Race(t *testing.T) {
-	query, err := gojq.Parse("range(10)")
+	query, err := jq.Parse("range(10)")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -283,11 +284,11 @@ func TestQueryString(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	q, err := gojq.Parse(string(cnt))
+	q, err := jq.Parse(string(cnt))
 	if err != nil {
 		t.Fatal(err)
 	}
-	r, err := gojq.Parse(q.String())
+	r, err := jq.Parse(q.String())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -297,7 +298,7 @@ func TestQueryString(t *testing.T) {
 }
 
 func BenchmarkRun(b *testing.B) {
-	query, err := gojq.Parse("range(1000)")
+	query, err := jq.Parse("range(1000)")
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -319,7 +320,7 @@ func BenchmarkParse(b *testing.B) {
 	}
 	src := string(cnt)
 	for i := 0; i < b.N; i++ {
-		_, err := gojq.Parse(src)
+		_, err := jq.Parse(src)
 		if err != nil {
 			b.Fatal(err)
 		}

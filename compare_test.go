@@ -2,6 +2,7 @@ package jq_test
 
 import (
 	"fmt"
+	"github.com/gozelle/jq"
 	"math"
 	"math/big"
 	"testing"
@@ -63,7 +64,7 @@ func TestCompare(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%v,%v", tc.l, tc.r), func(t *testing.T) {
-			got := gojq.Compare(tc.l, tc.r)
+			got := jq.Compare(tc.l, tc.r)
 			if got != tc.expected {
 				t.Errorf("Compare(%v, %v): got %d, expected %d", tc.l, tc.r, got, tc.expected)
 			}

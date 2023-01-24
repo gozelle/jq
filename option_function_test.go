@@ -3,6 +3,7 @@ package jq_test
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gozelle/jq"
 	"log"
 	"math/big"
 	"strconv"
@@ -23,13 +24,13 @@ func toFloat(x interface{}) (float64, bool) {
 }
 
 func ExampleWithFunction() {
-	query, err := gojq.Parse(".[] | f | f(3)")
+	query, err := jq.Parse(".[] | f | f(3)")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	code, err := gojq.Compile(
+	code, err := jq.Compile(
 		query,
-		gojq.WithFunction("f", 0, 1, func(x interface{}, xs []interface{}) interface{} {
+		jq.WithFunction("f", 0, 1, func(x interface{}, xs []interface{}) interface{} {
 			if x, ok := toFloat(x); ok {
 				if len(xs) == 1 {
 					if y, ok := toFloat(xs[0]); ok {

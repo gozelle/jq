@@ -2,17 +2,18 @@ package jq_test
 
 import (
 	"fmt"
+	"github.com/gozelle/jq"
 	"log"
 )
 
 func ExampleWithEnvironLoader() {
-	query, err := gojq.Parse("env | keys[]")
+	query, err := jq.Parse("env | keys[]")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	code, err := gojq.Compile(
+	code, err := jq.Compile(
 		query,
-		gojq.WithEnvironLoader(func() []string {
+		jq.WithEnvironLoader(func() []string {
 			return []string{"foo=42", "bar=128"}
 		}),
 	)

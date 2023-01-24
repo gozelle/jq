@@ -34,11 +34,11 @@ func run(input, output string) error {
 	if err != nil {
 		return err
 	}
-	q, err := gojq.Parse(string(cnt))
+	q, err := jq.Parse(string(cnt))
 	if err != nil {
 		return err
 	}
-	fds := make(map[string][]*gojq.FuncDef)
+	fds := make(map[string][]*jq.FuncDef)
 	for _, fd := range q.FuncDefs {
 		fd.Minify()
 		fds[fd.Name] = append(fds[fd.Name], fd)
@@ -81,15 +81,15 @@ func printCompositeLit(out *strings.Builder, t *ast.CompositeLit) error {
 			return err
 		}
 		str := sb.String()
-		for op := gojq.OpPipe; op <= gojq.OpUpdateAlt; op++ {
+		for op := jq.OpPipe; op <= jq.OpUpdateAlt; op++ {
 			r := regexp.MustCompile(fmt.Sprintf(`\b((?:Update)?Op): %d\b`, op))
 			str = r.ReplaceAllString(str, fmt.Sprintf("$1: %#v", op))
 		}
-		for termType := gojq.TermTypeIdentity; termType <= gojq.TermTypeQuery; termType++ {
+		for termType := jq.TermTypeIdentity; termType <= jq.TermTypeQuery; termType++ {
 			r := regexp.MustCompile(fmt.Sprintf(`(Term{Type): %d\b`, termType))
 			str = r.ReplaceAllString(str, fmt.Sprintf("$1: %#v", termType))
 		}
-		out.WriteString(strings.ReplaceAll(str, "gojq.", ""))
+		out.WriteString(strings.ReplaceAll(str, "jq.", ""))
 		out.WriteString(",")
 	}
 	out.WriteString("\n\t}\n")

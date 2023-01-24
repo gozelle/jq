@@ -4,28 +4,29 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/gozelle/jq"
 	"reflect"
 	"testing"
 )
 
 func TestWithModuleLoaderError(t *testing.T) {
-	query, err := gojq.Parse(`
+	query, err := jq.Parse(`
 		import "module1" as m;
 		m::f
 	`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = gojq.Compile(query)
+	_, err = jq.Compile(query)
 	if got, expected := err.Error(), `cannot load module: "module1"`; got != expected {
 		t.Errorf("expected: %v, got: %v", expected, got)
 	}
 
-	query, err = gojq.Parse("modulemeta")
+	query, err = jq.Parse("modulemeta")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query)
+	code, err := jq.Compile(query)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,15 +49,15 @@ func TestWithModuleLoaderError(t *testing.T) {
 }
 
 func TestWithModuleLoader_modulemeta(t *testing.T) {
-	query, err := gojq.Parse(`
+	query, err := jq.Parse(`
 		"module1" | modulemeta
 	`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(
+	code, err := jq.Compile(
 		query,
-		gojq.WithModuleLoader(&moduleLoader{}),
+		jq.WithModuleLoader(&moduleLoader{}),
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -93,16 +94,16 @@ func (*moduleLoaderJSON) LoadJSON(name string) (interface{}, error) {
 }
 
 func TestWithModuleLoader_JSON(t *testing.T) {
-	query, err := gojq.Parse(`
+	query, err := jq.Parse(`
 		import "module1" as $m;
 		[$m, $m[1]*$m[2]]
 	`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(
+	code, err := jq.Compile(
 		query,
-		gojq.WithModuleLoader(&moduleLoaderJSON{}),
+		jq.WithModuleLoader(&moduleLoaderJSON{}),
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -121,25 +122,25 @@ func TestWithModuleLoader_JSON(t *testing.T) {
 
 type moduleLoaderInitModules struct{}
 
-func (*moduleLoaderInitModules) LoadInitModules() ([]*gojq.Query, error) {
-	query, err := gojq.Parse(`
+func (*moduleLoaderInitModules) LoadInitModules() ([]*jq.Query, error) {
+	query, err := jq.Parse(`
 		def f: 42;
 		def g: f * f;
 	`)
 	if err != nil {
 		return nil, err
 	}
-	return []*gojq.Query{query}, nil
+	return []*jq.Query{query}, nil
 }
 
 func TestWithModuleLoader_LoadInitModules(t *testing.T) {
-	query, err := gojq.Parse("g")
+	query, err := jq.Parse("g")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(
+	code, err := jq.Compile(
 		query,
-		gojq.WithModuleLoader(&moduleLoaderInitModules{}),
+		jq.WithModuleLoader(&moduleLoaderInitModules{}),
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -157,13 +158,13 @@ func TestWithModuleLoader_LoadInitModules(t *testing.T) {
 }
 
 func TestWithEnvironLoader(t *testing.T) {
-	query, err := gojq.Parse("env")
+	query, err := jq.Parse("env")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(
+	code, err := jq.Compile(
 		query,
-		gojq.WithEnvironLoader(func() []string {
+		jq.WithEnvironLoader(func() []string {
 			return []string{"foo=42", "bar=128", "baz", "qux=", "=0"}
 		}),
 	)
@@ -184,11 +185,11 @@ func TestWithEnvironLoader(t *testing.T) {
 }
 
 func TestWithEnvironLoaderEmpty(t *testing.T) {
-	query, err := gojq.Parse("env")
+	query, err := jq.Parse("env")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query)
+	code, err := jq.Compile(query)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -205,14 +206,14 @@ func TestWithEnvironLoaderEmpty(t *testing.T) {
 }
 
 func TestWithVariablesError0(t *testing.T) {
-	query, err := gojq.Parse(".")
+	query, err := jq.Parse(".")
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, name := range []string{"", "$", "_x", "x", "$0x", "$$", "$x ", " $x"} {
-		_, err = gojq.Compile(
+		_, err = jq.Compile(
 			query,
-			gojq.WithVariables([]string{name}),
+			jq.WithVariables([]string{name}),
 		)
 		if err == nil {
 			t.Fatalf("%q is not a valid variable name", name)
@@ -224,13 +225,13 @@ func TestWithVariablesError0(t *testing.T) {
 }
 
 func TestWithVariablesError1(t *testing.T) {
-	query, err := gojq.Parse(".")
+	query, err := jq.Parse(".")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(
+	code, err := jq.Compile(
 		query,
-		gojq.WithVariables([]string{"$x"}),
+		jq.WithVariables([]string{"$x"}),
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -254,13 +255,13 @@ func TestWithVariablesError1(t *testing.T) {
 }
 
 func TestWithVariablesError2(t *testing.T) {
-	query, err := gojq.Parse(".")
+	query, err := jq.Parse(".")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(
+	code, err := jq.Compile(
 		query,
-		gojq.WithVariables([]string{"$x"}),
+		jq.WithVariables([]string{"$x"}),
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -284,14 +285,14 @@ func TestWithVariablesError2(t *testing.T) {
 }
 
 func TestWithFunction(t *testing.T) {
-	options := []gojq.CompilerOption{
-		gojq.WithFunction("f", 0, 0, func(x interface{}, _ []interface{}) interface{} {
+	options := []jq.CompilerOption{
+		jq.WithFunction("f", 0, 0, func(x interface{}, _ []interface{}) interface{} {
 			if x, ok := x.(int); ok {
 				return x * 2
 			}
 			return fmt.Errorf("f cannot be applied to: %v", x)
 		}),
-		gojq.WithFunction("g", 1, 1, func(x interface{}, xs []interface{}) interface{} {
+		jq.WithFunction("g", 1, 1, func(x interface{}, xs []interface{}) interface{} {
 			if x, ok := x.(int); ok {
 				if y, ok := xs[0].(int); ok {
 					return x + y
@@ -300,11 +301,11 @@ func TestWithFunction(t *testing.T) {
 			return fmt.Errorf("g cannot be applied to: %v, %v", x, xs)
 		}),
 	}
-	query, err := gojq.Parse(".[] | f | g(3)")
+	query, err := jq.Parse(".[] | f | g(3)")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query, options...)
+	code, err := jq.Compile(query, options...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -323,13 +324,13 @@ func TestWithFunction(t *testing.T) {
 	if expected := 5; n != expected {
 		t.Errorf("expected: %v, got: %v", expected, n)
 	}
-	query, err = gojq.Parse(
+	query, err = jq.Parse(
 		`("f/0", "f/1", "g/0", "g/1") as $f | builtins | any(. == $f)`,
 	)
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err = gojq.Compile(query, options...)
+	code, err = jq.Compile(query, options...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -351,14 +352,14 @@ func TestWithFunction(t *testing.T) {
 }
 
 func TestWithFunctionDuplicateName(t *testing.T) {
-	options := []gojq.CompilerOption{
-		gojq.WithFunction("f", 0, 0, func(x interface{}, _ []interface{}) interface{} {
+	options := []jq.CompilerOption{
+		jq.WithFunction("f", 0, 0, func(x interface{}, _ []interface{}) interface{} {
 			if x, ok := x.(int); ok {
 				return x * 2
 			}
 			return fmt.Errorf("f cannot be applied to: %v", x)
 		}),
-		gojq.WithFunction("f", 1, 1, func(x interface{}, xs []interface{}) interface{} {
+		jq.WithFunction("f", 1, 1, func(x interface{}, xs []interface{}) interface{} {
 			if x, ok := x.(int); ok {
 				if y, ok := xs[0].(int); ok {
 					return x + y
@@ -366,13 +367,13 @@ func TestWithFunctionDuplicateName(t *testing.T) {
 			}
 			return fmt.Errorf("f cannot be applied to: %v, %v", x, xs)
 		}),
-		gojq.WithFunction("f", 0, 0, func(x interface{}, _ []interface{}) interface{} {
+		jq.WithFunction("f", 0, 0, func(x interface{}, _ []interface{}) interface{} {
 			if x, ok := x.(int); ok {
 				return x * 4
 			}
 			return fmt.Errorf("f cannot be applied to: %v", x)
 		}),
-		gojq.WithFunction("f", 2, 2, func(x interface{}, xs []interface{}) interface{} {
+		jq.WithFunction("f", 2, 2, func(x interface{}, xs []interface{}) interface{} {
 			if x, ok := x.(int); ok {
 				if y, ok := xs[0].(int); ok {
 					if z, ok := xs[1].(int); ok {
@@ -383,11 +384,11 @@ func TestWithFunctionDuplicateName(t *testing.T) {
 			return fmt.Errorf("f cannot be applied to: %v, %v", x, xs)
 		}),
 	}
-	query, err := gojq.Parse(".[] | f | f(3) | f(4; 5)")
+	query, err := jq.Parse(".[] | f | f(3) | f(4; 5)")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query, options...)
+	code, err := jq.Compile(query, options...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -406,13 +407,13 @@ func TestWithFunctionDuplicateName(t *testing.T) {
 	if expected := 5; n != expected {
 		t.Errorf("expected: %v, got: %v", expected, n)
 	}
-	query, err = gojq.Parse(
+	query, err = jq.Parse(
 		`("f/0", "f/1", "f/2", "f/3") as $f | builtins | any(. == $f)`,
 	)
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err = gojq.Compile(query, options...)
+	code, err = jq.Compile(query, options...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -434,8 +435,8 @@ func TestWithFunctionDuplicateName(t *testing.T) {
 }
 
 func TestWithFunctionMultipleArities(t *testing.T) {
-	options := []gojq.CompilerOption{
-		gojq.WithFunction("f", 0, 4, func(x interface{}, xs []interface{}) interface{} {
+	options := []jq.CompilerOption{
+		jq.WithFunction("f", 0, 4, func(x interface{}, xs []interface{}) interface{} {
 			if x, ok := x.(int); ok {
 				x *= 2
 				for _, y := range xs {
@@ -447,7 +448,7 @@ func TestWithFunctionMultipleArities(t *testing.T) {
 			}
 			return fmt.Errorf("f cannot be applied to: %v, %v", x, xs)
 		}),
-		gojq.WithFunction("f", 2, 3, func(x interface{}, xs []interface{}) interface{} {
+		jq.WithFunction("f", 2, 3, func(x interface{}, xs []interface{}) interface{} {
 			if x, ok := x.(int); ok {
 				for _, y := range xs {
 					if y, ok := y.(int); ok {
@@ -458,15 +459,15 @@ func TestWithFunctionMultipleArities(t *testing.T) {
 			}
 			return fmt.Errorf("f cannot be applied to: %v, %v", x, xs)
 		}),
-		gojq.WithFunction("g", 0, 30, func(x interface{}, xs []interface{}) interface{} {
+		jq.WithFunction("g", 0, 30, func(x interface{}, xs []interface{}) interface{} {
 			return nil
 		}),
 	}
-	query, err := gojq.Parse(".[] | f | f(1) | f(2; 3) | f(4; 5; 6) | f(7; 8; 9; 10)")
+	query, err := jq.Parse(".[] | f | f(1) | f(2; 3) | f(4; 5; 6) | f(7; 8; 9; 10)")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query, options...)
+	code, err := jq.Compile(query, options...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -485,13 +486,13 @@ func TestWithFunctionMultipleArities(t *testing.T) {
 	if expected := 5; n != expected {
 		t.Errorf("expected: %v, got: %v", expected, n)
 	}
-	query, err = gojq.Parse(
+	query, err = jq.Parse(
 		`("f/0", "f/1", "f/2", "f/3", "f/4", "f/5") as $f | builtins | any(. == $f)`,
 	)
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err = gojq.Compile(query, options...)
+	code, err = jq.Compile(query, options...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -526,12 +527,12 @@ func (err *valueError) Value() interface{} {
 
 func TestWithFunctionValueError(t *testing.T) {
 	expected := map[string]interface{}{"foo": 42}
-	query, err := gojq.Parse("try f catch .")
+	query, err := jq.Parse("try f catch .")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query,
-		gojq.WithFunction("f", 0, 0, func(x interface{}, _ []interface{}) interface{} {
+	code, err := jq.Compile(query,
+		jq.WithFunction("f", 0, 0, func(x interface{}, _ []interface{}) interface{} {
 			return &valueError{expected}
 		}),
 	)
@@ -551,12 +552,12 @@ func TestWithFunctionValueError(t *testing.T) {
 }
 
 func TestWithFunctionCompileArgsError(t *testing.T) {
-	query, err := gojq.Parse("f(g)")
+	query, err := jq.Parse("f(g)")
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = gojq.Compile(query,
-		gojq.WithFunction("f", 0, 1, func(interface{}, []interface{}) interface{} {
+	_, err = jq.Compile(query,
+		jq.WithFunction("f", 0, 1, func(interface{}, []interface{}) interface{} {
 			return 0
 		}),
 	)
@@ -566,7 +567,7 @@ func TestWithFunctionCompileArgsError(t *testing.T) {
 }
 
 func TestWithFunctionArityError(t *testing.T) {
-	query, err := gojq.Parse("f")
+	query, err := jq.Parse("f")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -578,8 +579,8 @@ func TestWithFunctionArityError(t *testing.T) {
 					t.Errorf("expected: %v, got: %v", expected, got)
 				}
 			}()
-			t.Fatal(gojq.Compile(query,
-				gojq.WithFunction("f", tc.min, tc.max, func(interface{}, []interface{}) interface{} {
+			t.Fatal(jq.Compile(query,
+				jq.WithFunction("f", tc.min, tc.max, func(interface{}, []interface{}) interface{} {
 					return 0
 				}),
 			))
@@ -588,24 +589,24 @@ func TestWithFunctionArityError(t *testing.T) {
 }
 
 func TestWithIterFunction(t *testing.T) {
-	query, err := gojq.Parse("f * g(5; 10), h, 10")
+	query, err := jq.Parse("f * g(5; 10), h, 10")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query,
-		gojq.WithIterFunction("f", 0, 0, func(interface{}, []interface{}) gojq.Iter {
-			return gojq.NewIter(1, 2, 3)
+	code, err := jq.Compile(query,
+		jq.WithIterFunction("f", 0, 0, func(interface{}, []interface{}) jq.Iter {
+			return jq.NewIter(1, 2, 3)
 		}),
-		gojq.WithIterFunction("g", 2, 2, func(_ interface{}, xs []interface{}) gojq.Iter {
+		jq.WithIterFunction("g", 2, 2, func(_ interface{}, xs []interface{}) jq.Iter {
 			if x, ok := xs[0].(int); ok {
 				if y, ok := xs[1].(int); ok {
 					return &rangeIter{x, y}
 				}
 			}
-			return gojq.NewIter(fmt.Errorf("g cannot be applied to: %v", xs))
+			return jq.NewIter(fmt.Errorf("g cannot be applied to: %v", xs))
 		}),
-		gojq.WithIterFunction("h", 0, 0, func(interface{}, []interface{}) gojq.Iter {
-			return gojq.NewIter()
+		jq.WithIterFunction("h", 0, 0, func(interface{}, []interface{}) jq.Iter {
+			return jq.NewIter()
 		}),
 	)
 	if err != nil {
@@ -629,13 +630,13 @@ func TestWithIterFunction(t *testing.T) {
 }
 
 func TestWithIterFunctionError(t *testing.T) {
-	query, err := gojq.Parse("range(3) * (f, 0), f")
+	query, err := jq.Parse("range(3) * (f, 0), f")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query,
-		gojq.WithIterFunction("f", 0, 0, func(interface{}, []interface{}) gojq.Iter {
-			return gojq.NewIter(1, errors.New("error"), 3)
+	code, err := jq.Compile(query,
+		jq.WithIterFunction("f", 0, 0, func(interface{}, []interface{}) jq.Iter {
+			return jq.NewIter(1, errors.New("error"), 3)
 		}),
 	)
 	if err != nil {
@@ -670,13 +671,13 @@ func TestWithIterFunctionError(t *testing.T) {
 }
 
 func TestWithIterFunctionPathIndexing(t *testing.T) {
-	query, err := gojq.Parse(".[f] = 1")
+	query, err := jq.Parse(".[f] = 1")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query,
-		gojq.WithIterFunction("f", 0, 0, func(interface{}, []interface{}) gojq.Iter {
-			return gojq.NewIter(0, 1, 2)
+	code, err := jq.Compile(query,
+		jq.WithIterFunction("f", 0, 0, func(interface{}, []interface{}) jq.Iter {
+			return jq.NewIter(0, 1, 2)
 		}),
 	)
 	if err != nil {
@@ -695,13 +696,13 @@ func TestWithIterFunctionPathIndexing(t *testing.T) {
 }
 
 func TestWithIterFunctionPathInputValue(t *testing.T) {
-	query, err := gojq.Parse("{x: 0} | (f|.x) = 1")
+	query, err := jq.Parse("{x: 0} | (f|.x) = 1")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query,
-		gojq.WithIterFunction("f", 0, 0, func(v interface{}, _ []interface{}) gojq.Iter {
-			return gojq.NewIter(v, v, v)
+	code, err := jq.Compile(query,
+		jq.WithIterFunction("f", 0, 0, func(v interface{}, _ []interface{}) jq.Iter {
+			return jq.NewIter(v, v, v)
 		}),
 	)
 	if err != nil {
@@ -720,13 +721,13 @@ func TestWithIterFunctionPathInputValue(t *testing.T) {
 }
 
 func TestWithIterFunctionPathEmpty(t *testing.T) {
-	query, err := gojq.Parse("{x: 0} | (f|.x) = 1")
+	query, err := jq.Parse("{x: 0} | (f|.x) = 1")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query,
-		gojq.WithIterFunction("f", 0, 0, func(interface{}, []interface{}) gojq.Iter {
-			return gojq.NewIter()
+	code, err := jq.Compile(query,
+		jq.WithIterFunction("f", 0, 0, func(interface{}, []interface{}) jq.Iter {
+			return jq.NewIter()
 		}),
 	)
 	if err != nil {
@@ -745,13 +746,13 @@ func TestWithIterFunctionPathEmpty(t *testing.T) {
 }
 
 func TestWithIterFunctionInvalidPathError(t *testing.T) {
-	query, err := gojq.Parse("{x: 0} | (f|.x) = 1")
+	query, err := jq.Parse("{x: 0} | (f|.x) = 1")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query,
-		gojq.WithIterFunction("f", 0, 0, func(interface{}, []interface{}) gojq.Iter {
-			return gojq.NewIter(map[string]interface{}{"x": 1})
+	code, err := jq.Compile(query,
+		jq.WithIterFunction("f", 0, 0, func(interface{}, []interface{}) jq.Iter {
+			return jq.NewIter(map[string]interface{}{"x": 1})
 		}),
 	)
 	if err != nil {
@@ -772,13 +773,13 @@ func TestWithIterFunctionInvalidPathError(t *testing.T) {
 }
 
 func TestWithIterFunctionPathError(t *testing.T) {
-	query, err := gojq.Parse("{x: 0} | (f|.x) = 1")
+	query, err := jq.Parse("{x: 0} | (f|.x) = 1")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query,
-		gojq.WithIterFunction("f", 0, 0, func(interface{}, []interface{}) gojq.Iter {
-			return gojq.NewIter(errors.New("error"))
+	code, err := jq.Compile(query,
+		jq.WithIterFunction("f", 0, 0, func(interface{}, []interface{}) jq.Iter {
+			return jq.NewIter(errors.New("error"))
 		}),
 	)
 	if err != nil {
@@ -799,7 +800,7 @@ func TestWithIterFunctionPathError(t *testing.T) {
 }
 
 func TestWithIterFunctionDefineError(t *testing.T) {
-	query, err := gojq.Parse("f")
+	query, err := jq.Parse("f")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -809,21 +810,21 @@ func TestWithIterFunctionDefineError(t *testing.T) {
 			t.Errorf("expected: %v, got: %v", expected, got)
 		}
 	}()
-	t.Fatal(gojq.Compile(query,
-		gojq.WithFunction("f", 0, 0, func(interface{}, []interface{}) interface{} {
+	t.Fatal(jq.Compile(query,
+		jq.WithFunction("f", 0, 0, func(interface{}, []interface{}) interface{} {
 			return 0
 		}),
-		gojq.WithIterFunction("f", 0, 0, func(interface{}, []interface{}) gojq.Iter {
-			return gojq.NewIter()
+		jq.WithIterFunction("f", 0, 0, func(interface{}, []interface{}) jq.Iter {
+			return jq.NewIter()
 		}),
 	))
 }
 
 type moduleLoader2 struct{}
 
-func (*moduleLoader2) LoadModule(name string) (*gojq.Query, error) {
+func (*moduleLoader2) LoadModule(name string) (*jq.Query, error) {
 	if name == "module1" {
-		return gojq.Parse(`
+		return jq.Parse(`
 			def g: def h: f * 3; h * 4;
 		`)
 	}
@@ -831,18 +832,18 @@ func (*moduleLoader2) LoadModule(name string) (*gojq.Query, error) {
 }
 
 func TestWithFunctionWithModuleLoader(t *testing.T) {
-	query, err := gojq.Parse(`include "module1"; .[] | g`)
+	query, err := jq.Parse(`include "module1"; .[] | g`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query,
-		gojq.WithFunction("f", 0, 0, func(x interface{}, _ []interface{}) interface{} {
+	code, err := jq.Compile(query,
+		jq.WithFunction("f", 0, 0, func(x interface{}, _ []interface{}) interface{} {
 			if x, ok := x.(int); ok {
 				return x * 2
 			}
 			return fmt.Errorf("f cannot be applied to: %v", x)
 		}),
-		gojq.WithModuleLoader(&moduleLoader2{}),
+		jq.WithModuleLoader(&moduleLoader2{}),
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -865,13 +866,13 @@ func TestWithFunctionWithModuleLoader(t *testing.T) {
 }
 
 func TestWithInputIter(t *testing.T) {
-	query, err := gojq.Parse("range(10) | input")
+	query, err := jq.Parse("range(10) | input")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(
+	code, err := jq.Compile(
 		query,
-		gojq.WithInputIter(gojq.NewIter(0, 1, 2, 3, 4)),
+		jq.WithInputIter(jq.NewIter(0, 1, 2, 3, 4)),
 	)
 	if err != nil {
 		t.Fatal(err)

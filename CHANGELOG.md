@@ -18,9 +18,9 @@
 * fix raw input option `--raw-input` (`-R`) to keep carriage returns and support 64KiB+ lines
 
 ## [v0.12.8](https://github.com/gozelle/jq/compare/v0.12.7..v0.12.8) (2022-06-01)
-* implement `gojq.Compare` for comparing values in custom internal functions
-* implement `gojq.TypeOf` for obtaining type name of values in custom internal functions
-* implement `gojq.Preview` for previewing values for error messages of custom internal functions
+* implement `jq.Compare` for comparing values in custom internal functions
+* implement `jq.TypeOf` for obtaining type name of values in custom internal functions
+* implement `jq.Preview` for previewing values for error messages of custom internal functions
 * fix query lexer to parse string literals as JSON to support surrogate pairs (`"\ud83d\ude04"`)
 * fix priority bug of declared and builtin functions (`def empty: .; null | select(.)`)
 * fix string indexing by index out of bounds to emit `null` (`"abc" | .[3]`)
@@ -88,7 +88,7 @@
 ## [v0.12.4](https://github.com/gozelle/jq/compare/v0.12.3..v0.12.4) (2021-06-01)
 * fix numeric conversion of large floating-point numbers in modulo operator
 * implement a compiler option for adding custom iterator functions
-* implement `gojq.NewIter` function for creating a new iterator from values
+* implement `jq.NewIter` function for creating a new iterator from values
 * implement `$ARGS.named` for listing command line variables
 * remove `debug` and `stderr` functions from the library
 * stop printing newlines on `stderr` function for jq compatibility
@@ -103,7 +103,7 @@
 ## [v0.12.2](https://github.com/gozelle/jq/compare/v0.12.1..v0.12.2) (2021-03-01)
 * implement `GOJQ_COLORS` environment variable to configure individual colors
 * respect `--color-output` (`-C`) option even if `NO_COLOR` is set
-* implement `gojq.ValueError` interface for custom internal functions
+* implement `jq.ValueError` interface for custom internal functions
 * fix crash on timestamps in YAML input
 * fix calculation on `infinite` (`infinite-infinite | isnan`)
 * fix comparison on `nan` (`nan < nan`)
@@ -126,14 +126,14 @@
 ## [v0.12.0](https://github.com/gozelle/jq/compare/v0.11.2..v0.12.0) (2020-12-24)
 * implement tab indentation option (`--tab`)
 * implement a compiler option for adding custom internal functions
-* implement `gojq.Marshal` function for jq-flavored encoding
+* implement `jq.Marshal` function for jq-flavored encoding
 * fix slurp option with JSON file arguments
 * fix escaping characters in object keys
 * fix normalizing negative `int64` to `int` on 32-bit architecture
 * fix crash on continuing iteration after emitting an error
 * `iter.Next()` does not normalize `NaN` and infinities anymore. Library users
   should take care of them. To handle them for encoding as JSON bytes, use
-  `gojq.Marshal`. Also, `iter.Next()` does not clone values deeply anymore for
+  `jq.Marshal`. Also, `iter.Next()` does not clone values deeply anymore for
   performance reason. Users must not update the elements of the returned arrays
   and objects
 * improve performance of outputting JSON values by about 3.5 times
@@ -161,7 +161,7 @@
 * fix modify operator (`|=`) with `try` `catch` expression
 * fix optional operator (`?`) with alternative operator (`//`) in `map_values` function
 * fix normalizing numeric types for library users
-* export `gojq.NewModuleLoader` function for library users
+* export `jq.NewModuleLoader` function for library users
 
 ## [v0.10.3](https://github.com/gozelle/jq/compare/v0.10.2..v0.10.3) (2020-06-06)
 * implement `add`, `unique_by`, `max_by`, `min_by`, `reverse` by internal

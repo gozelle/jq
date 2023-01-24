@@ -3,6 +3,7 @@ package jq_test
 import (
 	"context"
 	"fmt"
+	"github.com/gozelle/jq"
 	"log"
 	"os"
 	"reflect"
@@ -13,11 +14,11 @@ import (
 )
 
 func ExampleCompile() {
-	query, err := gojq.Parse(".[] | .foo")
+	query, err := jq.Parse(".[] | .foo")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	code, err := gojq.Compile(query)
+	code, err := jq.Compile(query)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -49,11 +50,11 @@ func ExampleCompile() {
 }
 
 func ExampleCode_Run() {
-	query, err := gojq.Parse(".foo")
+	query, err := jq.Parse(".foo")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	code, err := gojq.Compile(query)
+	code, err := jq.Compile(query)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -75,11 +76,11 @@ func ExampleCode_Run() {
 }
 
 func ExampleCode_RunWithContext() {
-	query, err := gojq.Parse("def f: f; f, f")
+	query, err := jq.Parse("def f: f; f, f")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	code, err := gojq.Compile(query)
+	code, err := jq.Compile(query)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -103,11 +104,11 @@ func ExampleCode_RunWithContext() {
 }
 
 func TestCodeCompile_OptimizeConstants(t *testing.T) {
-	query, err := gojq.Parse(`[1,{foo:2,"bar":+3},[-4]]`)
+	query, err := jq.Parse(`[1,{foo:2,"bar":+3},[-4]]`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query)
+	code, err := jq.Compile(query)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,11 +131,11 @@ func TestCodeCompile_OptimizeConstants(t *testing.T) {
 }
 
 func TestCodeCompile_OptimizeIndexSlice(t *testing.T) {
-	query, err := gojq.Parse(`.foo."bar".["baz"].[-1]."".[0:1]`)
+	query, err := jq.Parse(`.foo."bar".["baz"].[-1]."".[0:1]`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query)
+	code, err := jq.Compile(query)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -155,11 +156,11 @@ func TestCodeCompile_OptimizeIndexSlice(t *testing.T) {
 }
 
 func TestCodeCompile_OptimizeIndexSliceAssign(t *testing.T) {
-	query, err := gojq.Parse(`.foo."bar".["baz"].[0]."".[0:1] = [0]`)
+	query, err := jq.Parse(`.foo."bar".["baz"].[0]."".[0:1] = [0]`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query)
+	code, err := jq.Compile(query)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -186,11 +187,11 @@ func TestCodeCompile_OptimizeIndexSliceAssign(t *testing.T) {
 }
 
 func TestCodeCompile_OptimizeTailRec_While(t *testing.T) {
-	query, err := gojq.Parse("0 | while(. < 10; . + 1)")
+	query, err := jq.Parse("0 | while(. < 10; . + 1)")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query)
+	code, err := jq.Compile(query)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -222,13 +223,13 @@ func TestCodeCompile_OptimizeTailRec_While(t *testing.T) {
 }
 
 func TestCodeCompile_OptimizeTailRec_CallRec(t *testing.T) {
-	query, err := gojq.Parse(`
+	query, err := jq.Parse(`
 		def f: . as $x | $x, (if $x < 3 then $x + 1 | f else empty end), $x; f
 	`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query)
+	code, err := jq.Compile(query)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -245,11 +246,11 @@ func TestCodeCompile_OptimizeTailRec_CallRec(t *testing.T) {
 }
 
 func TestCodeCompile_OptimizeJumps(t *testing.T) {
-	query, err := gojq.Parse("def f: 1; def g: 2; def h: 3; f")
+	query, err := jq.Parse("def f: 1; def g: 2; def h: 3; f")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query)
+	code, err := jq.Compile(query)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -274,11 +275,11 @@ func TestCodeCompile_OptimizeJumps(t *testing.T) {
 }
 
 func TestCodeRun_Race(t *testing.T) {
-	query, err := gojq.Parse("range(10)")
+	query, err := jq.Parse("range(10)")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := gojq.Compile(query)
+	code, err := jq.Compile(query)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -312,14 +313,14 @@ func BenchmarkCompile(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	query, err := gojq.Parse(string(cnt))
+	query, err := jq.Parse(string(cnt))
 	if err != nil {
 		b.Fatal(err)
 	}
 	for i := 0; i < b.N; i++ {
-		_, err := gojq.Compile(
+		_, err := jq.Compile(
 			query,
-			gojq.WithInputIter(gojq.NewIter()),
+			jq.WithInputIter(jq.NewIter()),
 		)
 		if err != nil {
 			b.Fatal(err)

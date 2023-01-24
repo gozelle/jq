@@ -2,6 +2,7 @@ package jq_test
 
 import (
 	"fmt"
+	"github.com/gozelle/jq"
 	"math"
 	"math/big"
 	"testing"
@@ -27,7 +28,7 @@ func TestTypeOf(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%v", tc.value), func(t *testing.T) {
-			got := gojq.TypeOf(tc.value)
+			got := jq.TypeOf(tc.value)
 			if got != tc.expected {
 				t.Errorf("TypeOf(%v): got %s, expected %s", tc.value, got, tc.expected)
 			}
@@ -40,6 +41,6 @@ func TestTypeOf(t *testing.T) {
 				t.Errorf("TypeOf(%v) should panic: got %v, expected %v", v, got, expected)
 			}
 		}()
-		_ = gojq.TypeOf(v)
+		_ = jq.TypeOf(v)
 	}()
 }

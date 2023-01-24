@@ -2,7 +2,7 @@ package cli
 
 import "os"
 
-// Run gojq.
+// Run jq.
 func Run() int {
 	return (&cli{
 		inStream:  os.Stdin,

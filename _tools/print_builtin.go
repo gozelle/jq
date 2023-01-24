@@ -13,11 +13,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	q, err := gojq.Parse(string(cnt))
+	q, err := jq.Parse(string(cnt))
 	if err != nil {
 		panic(err)
 	}
-	fds := make(map[string][]*gojq.FuncDef)
+	fds := make(map[string][]*jq.FuncDef)
 	for _, fd := range q.FuncDefs {
 		fd.Minify()
 		fds[fd.Name] = append(fds[fd.Name], fd)
@@ -34,7 +34,7 @@ func main() {
 		for _, fd := range fds[n] {
 			fmt.Fprintf(&sb, "%s ", fd)
 		}
-		q, err := gojq.Parse(sb.String())
+		q, err := jq.Parse(sb.String())
 		if err != nil {
 			panic(fmt.Sprintf("%s: %s", err, sb.String()))
 		}

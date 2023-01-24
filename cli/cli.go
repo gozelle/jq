@@ -4,6 +4,7 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"github.com/gozelle/jq"
 	"io"
 	"os"
 	"path/filepath"
@@ -223,7 +224,7 @@ Usage:
 			}
 		}()
 	}
-	query, err := gojq.Parse(arg)
+	query, err := jq.Parse(arg)
 	if err != nil {
 		return &queryParseError{fname, arg, err}
 	}
@@ -233,13 +234,13 @@ Usage:
 	}
 	iter := cli.createInputIter(args)
 	defer iter.Close()
-	code, err := gojq.Compile(query,
-		gojq.WithModuleLoader(gojq.NewModuleLoader(modulePaths)),
-		gojq.WithEnvironLoader(os.Environ),
-		gojq.WithVariables(cli.argnames),
-		gojq.WithFunction("debug", 0, 0, cli.funcDebug),
-		gojq.WithFunction("stderr", 0, 0, cli.funcStderr),
-		gojq.WithFunction("input_filename", 0, 0,
+	code, err := jq.Compile(query,
+		jq.WithModuleLoader(jq.NewModuleLoader(modulePaths)),
+		jq.WithEnvironLoader(os.Environ),
+		jq.WithVariables(cli.argnames),
+		jq.WithFunction("debug", 0, 0, cli.funcDebug),
+		jq.WithFunction("stderr", 0, 0, cli.funcStderr),
+		jq.WithFunction("input_filename", 0, 0,
 			func(iter inputIter) func(interface{}, []interface{}) interface{} {
 				return func(interface{}, []interface{}) interface{} {
 					if fname := iter.Name(); fname != "" && (len(args) > 0 || !opts.InputNull) {
@@ -249,7 +250,7 @@ Usage:
 				}
 			}(iter),
 		),
-		gojq.WithInputIter(iter),
+		jq.WithInputIter(iter),
 	)
 	if err != nil {
 		if err, ok := err.(interface {
@@ -332,7 +333,7 @@ func (cli *cli) createInputIter(args []string) (iter inputIter) {
 	return newFilesInputIter(newIter, args, cli.inStream)
 }
 
-func (cli *cli) process(iter inputIter, code *gojq.Code) error {
+func (cli *cli) process(iter inputIter, code *jq.Code) error {
 	var err error
 	for {
 		v, ok := iter.Next()
@@ -351,7 +352,7 @@ func (cli *cli) process(iter inputIter, code *gojq.Code) error {
 	}
 }
 
-func (cli *cli) printValues(iter gojq.Iter) error {
+func (cli *cli) printValues(iter jq.Iter) error {
 	m := cli.createMarshaler()
 	for {
 		v, ok := iter.Next()
@@ -421,12 +422,12 @@ func (cli *cli) printError(err error) {
 	if er, ok := err.(interface{ IsEmptyError() bool }); !ok || !er.IsEmptyError() {
 		if er, ok := err.(interface{ IsHaltError() bool }); !ok || !er.IsHaltError() {
 			fmt.Fprintf(cli.errStream, "%s: %s\n", name, err)
-		} else if er, ok := err.(gojq.ValueError); ok {
+		} else if er, ok := err.(jq.ValueError); ok {
 			v := er.Value()
 			if str, ok := v.(string); ok {
 				cli.errStream.Write([]byte(str))
 			} else {
-				bs, _ := gojq.Marshal(v)
+				bs, _ := jq.Marshal(v)
 				cli.errStream.Write(bs)
 				cli.errStream.Write([]byte{'\n'})
 			}

@@ -58,7 +58,7 @@ brew install gojq
 
 ### Zero Install
 ```sh
-0install add gojq https://apps.0install.net/utils/gojq.xml
+0install add gojq https://apps.0install.net/utils/jq.xml
 ```
 
 ### Build from source
@@ -105,7 +105,7 @@ import (
 )
 
 func main() {
-	query, err := gojq.Parse(".foo | ..")
+	query, err := jq.Parse(".foo | ..")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -124,23 +124,23 @@ func main() {
 }
 ```
 
-- Firstly, use [`gojq.Parse(string) (*Query, error)`](https://pkg.go.dev/github.com/gozelle/jq#Parse) to get the query from a string.
+- Firstly, use [`jq.Parse(string) (*Query, error)`](https://pkg.go.dev/github.com/gozelle/jq#Parse) to get the query from a string.
 - Secondly, get the result iterator
   - using [`query.Run`](https://pkg.go.dev/github.com/gozelle/jq#Query.Run) or [`query.RunWithContext`](https://pkg.go.dev/github.com/gozelle/jq#Query.RunWithContext)
-  - or alternatively, compile the query using [`gojq.Compile`](https://pkg.go.dev/github.com/gozelle/jq#Compile) and then [`code.Run`](https://pkg.go.dev/github.com/gozelle/jq#Code.Run) or [`code.RunWithContext`](https://pkg.go.dev/github.com/gozelle/jq#Code.RunWithContext). You can reuse the `*Code` against multiple inputs to avoid compilation of the same query. But for arguments of `code.Run`, do not give values sharing same data between multiple calls.
+  - or alternatively, compile the query using [`jq.Compile`](https://pkg.go.dev/github.com/gozelle/jq#Compile) and then [`code.Run`](https://pkg.go.dev/github.com/gozelle/jq#Code.Run) or [`code.RunWithContext`](https://pkg.go.dev/github.com/gozelle/jq#Code.RunWithContext). You can reuse the `*Code` against multiple inputs to avoid compilation of the same query. But for arguments of `code.Run`, do not give values sharing same data between multiple calls.
   - In either case, you cannot use custom type values as the query input. The type should be `[]interface{}` for an array and `map[string]interface{}` for a map (just like decoded to an `interface{}` using the [encoding/json](https://golang.org/pkg/encoding/json/) package). You can't use `[]int` or `map[string]string`, for example. If you want to query your custom struct, marshal to JSON, unmarshal to `interface{}` and use it as the query input.
 - Thirdly, iterate through the results using [`iter.Next() (interface{}, bool)`](https://pkg.go.dev/github.com/gozelle/jq#Iter). The iterator can emit an error so make sure to handle it. The method returns `true` with results, and `false` when the iterator terminates.
   - The return type is not `(interface{}, error)` because iterators can emit multiple errors and you can continue after an error. It is difficult for the iterator to tell the termination in this situation.
   - Note that the result iterator may emit infinite number of values; `repeat(0)` and `range(infinite)`. It may stuck with no output value; `def f: f; f`. Use `RunWithContext` when you want to limit the execution time.
 
-[`gojq.Compile`](https://pkg.go.dev/github.com/gozelle/jq#Compile) allows to configure the following compiler options.
+[`jq.Compile`](https://pkg.go.dev/github.com/gozelle/jq#Compile) allows to configure the following compiler options.
 
-- [`gojq.WithModuleLoader`](https://pkg.go.dev/github.com/gozelle/jq#WithModuleLoader) allows to load modules. By default, the module feature is disabled. If you want to load modules from the file system, use [`gojq.NewModuleLoader`](https://pkg.go.dev/github.com/gozelle/jq#NewModuleLoader).
-- [`gojq.WithEnvironLoader`](https://pkg.go.dev/github.com/gozelle/jq#WithEnvironLoader) allows to configure the environment variables referenced by `env` and `$ENV`. By default, OS environment variables are not accessible due to security reasons. You can use `gojq.WithEnvironLoader(os.Environ)` if you want.
-- [`gojq.WithVariables`](https://pkg.go.dev/github.com/gozelle/jq#WithVariables) allows to configure the variables which can be used in the query. Pass the values of the variables to [`code.Run`](https://pkg.go.dev/github.com/gozelle/jq#Code.Run) in the same order.
-- [`gojq.WithFunction`](https://pkg.go.dev/github.com/gozelle/jq#WithFunction) allows to add a custom internal function. An internal function can return a single value (which can be an error) each invocation. To add a jq function (which may include a comma operator to emit multiple values, `empty` function, accept a filter for its argument, or call another built-in function), use `LoadInitModules` of the module loader.
-- [`gojq.WithIterFunction`](https://pkg.go.dev/github.com/gozelle/jq#WithIterFunction) allows to add a custom iterator function. An iterator function returns an iterator to emit multiple values. You cannot define both iterator and non-iterator functions of the same name (with possibly different arities). You can use [`gojq.NewIter`](https://pkg.go.dev/github.com/gozelle/jq#NewIter) to convert values or an error to a [`gojq.Iter`](https://pkg.go.dev/github.com/gozelle/jq#Iter).
-- [`gojq.WithInputIter`](https://pkg.go.dev/github.com/gozelle/jq#WithInputIter) allows to use `input` and `inputs` functions. By default, these functions are disabled.
+- [`jq.WithModuleLoader`](https://pkg.go.dev/github.com/gozelle/jq#WithModuleLoader) allows to load modules. By default, the module feature is disabled. If you want to load modules from the file system, use [`jq.NewModuleLoader`](https://pkg.go.dev/github.com/gozelle/jq#NewModuleLoader).
+- [`jq.WithEnvironLoader`](https://pkg.go.dev/github.com/gozelle/jq#WithEnvironLoader) allows to configure the environment variables referenced by `env` and `$ENV`. By default, OS environment variables are not accessible due to security reasons. You can use `jq.WithEnvironLoader(os.Environ)` if you want.
+- [`jq.WithVariables`](https://pkg.go.dev/github.com/gozelle/jq#WithVariables) allows to configure the variables which can be used in the query. Pass the values of the variables to [`code.Run`](https://pkg.go.dev/github.com/gozelle/jq#Code.Run) in the same order.
+- [`jq.WithFunction`](https://pkg.go.dev/github.com/gozelle/jq#WithFunction) allows to add a custom internal function. An internal function can return a single value (which can be an error) each invocation. To add a jq function (which may include a comma operator to emit multiple values, `empty` function, accept a filter for its argument, or call another built-in function), use `LoadInitModules` of the module loader.
+- [`jq.WithIterFunction`](https://pkg.go.dev/github.com/gozelle/jq#WithIterFunction) allows to add a custom iterator function. An iterator function returns an iterator to emit multiple values. You cannot define both iterator and non-iterator functions of the same name (with possibly different arities). You can use [`jq.NewIter`](https://pkg.go.dev/github.com/gozelle/jq#NewIter) to convert values or an error to a [`jq.Iter`](https://pkg.go.dev/github.com/gozelle/jq#Iter).
+- [`jq.WithInputIter`](https://pkg.go.dev/github.com/gozelle/jq#WithInputIter) allows to use `input` and `inputs` functions. By default, these functions are disabled.
 
 ## Bug Tracker
 Report bug at [Issues・itchyny/gojq - GitHub](https://github.com/gozelle/jq/issues).

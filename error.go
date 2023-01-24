@@ -333,7 +333,7 @@ func typeErrorPreview(v interface{}) string {
 	case nil:
 		return "null"
 	case Iter:
-		return "gojq.Iter"
+		return "jq.Iter"
 	default:
 		return TypeOf(v) + " (" + Preview(v) + ")"
 	}
