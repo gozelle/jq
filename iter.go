@@ -1,4 +1,4 @@
-package gojq
+package jq
 
 // Iter is an interface for an iterator.
 type Iter interface {

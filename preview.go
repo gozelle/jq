@@ -1,4 +1,4 @@
-package gojq
+package jq
 
 import "unicode/utf8"
 

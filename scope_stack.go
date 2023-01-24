@@ -1,4 +1,4 @@
-package gojq
+package jq
 
 type scopeStack struct {
 	data  []scopeBlock

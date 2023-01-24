@@ -1,4 +1,4 @@
-package gojq_test
+package jq_test
 
 import (
 	"context"
@@ -14,8 +14,6 @@ import (
 	"sync"
 	"testing"
 	"time"
-
-	"github.com/itchyny/gojq"
 )
 
 func ExampleQuery_Run() {

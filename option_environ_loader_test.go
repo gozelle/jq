@@ -1,10 +1,8 @@
-package gojq_test
+package jq_test
 
 import (
 	"fmt"
 	"log"
-
-	"github.com/itchyny/gojq"
 )
 
 func ExampleWithEnvironLoader() {

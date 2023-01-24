@@ -1,4 +1,4 @@
-package gojq
+package jq
 
 // TermType represents the type of [Term].
 type TermType int

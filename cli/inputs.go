@@ -9,8 +9,6 @@ import (
 	"strings"
 
 	"gopkg.in/yaml.v3"
-
-	"github.com/itchyny/gojq"
 )
 
 type inputReader struct {

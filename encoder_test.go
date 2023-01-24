@@ -1,12 +1,10 @@
-package gojq_test
+package jq_test
 
 import (
 	"fmt"
 	"math"
 	"math/big"
 	"testing"
-
-	"github.com/itchyny/gojq"
 )
 
 func TestMarshal(t *testing.T) {

@@ -1,4 +1,4 @@
-package gojq_test
+package jq_test
 
 import (
 	"encoding/json"
@@ -6,8 +6,6 @@ import (
 	"log"
 	"math/big"
 	"strconv"
-
-	"github.com/itchyny/gojq"
 )
 
 func toFloat(x interface{}) (float64, bool) {

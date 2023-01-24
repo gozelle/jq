@@ -1,4 +1,4 @@
-package gojq
+package jq
 
 import (
 	"encoding/base64"
@@ -15,8 +15,6 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
-
-	"github.com/itchyny/timefmt-go"
 )
 
 //go:generate go run -modfile=go.dev.mod _tools/gen_builtin.go -i builtin.jq -o builtin.go

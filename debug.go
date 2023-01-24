@@ -1,7 +1,7 @@
 //go:build gojq_debug
 // +build gojq_debug
 
-package gojq
+package jq
 
 import (
 	"fmt"

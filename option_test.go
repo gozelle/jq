@@ -1,4 +1,4 @@
-package gojq_test
+package jq_test
 
 import (
 	"encoding/json"
@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-
-	"github.com/itchyny/gojq"
 )
 
 func TestWithModuleLoaderError(t *testing.T) {

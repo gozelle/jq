@@ -1,10 +1,9 @@
-module github.com/itchyny/gojq
+module github.com/gozelle/jq
 
 go 1.17
 
 require (
 	github.com/google/go-cmp v0.5.4
-	github.com/itchyny/timefmt-go v0.1.5
 	github.com/mattn/go-isatty v0.0.16
 	github.com/mattn/go-runewidth v0.0.14
 	gopkg.in/yaml.v3 v3.0.1

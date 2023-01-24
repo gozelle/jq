@@ -6,8 +6,6 @@ import (
 	"reflect"
 	"sort"
 	"strings"
-
-	"github.com/itchyny/gojq"
 )
 
 func main() {

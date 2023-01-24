@@ -1,4 +1,4 @@
-package gojq
+package jq
 
 type stack struct {
 	data  []block
